@@ -1,4 +1,5 @@
 ﻿using System;
+//Library Koneksi Database : Sysytem.Data dan System.Data.SqlClient
 using System.Data;
 using System.Data.SqlClient;
 
@@ -6,15 +7,21 @@ namespace BasicConnection;
 
 class Program
 {
+    //Deklarasi ConnectionString berisi variabel-variabel yang digunakan untuk menyambungkan project dengan database
     static string ConnectionString = "Data Source=DESKTOP-B9H18JH;Database=db_hr_dts;Integrated Security=True;Connect Timeout=30;";
 
+    //Membuat variable koneksi menggunakan SqlConnection
     static SqlConnection connection; 
     static void Main(String[] args)
     {
+        //Membuat variabel objek connection
         connection = new SqlConnection(ConnectionString);
+        //Melakukan test koneksi program dengan database
         try {
+            //Membuka koneksi
             connection.Open();
             Console.WriteLine("Koneksi Berhasil Dibuka!");
+            //Menutup koneksi
             connection.Close();
         } catch (Exception e) {
             Console.WriteLine(e.Message);
@@ -33,16 +40,21 @@ class Program
         GetAllData();
     }
 
+    //Fungsi menampilkan semua data dalam database
     static void GetAllData()
     {
+        //Deklarasi koneksi
         connection = new SqlConnection(ConnectionString);
 
+        //Membuat SqlCommand object : memuat perintah SQL
         SqlCommand command = new SqlCommand();
         command.Connection = connection;
         command.CommandText = "SELECT * FROM tbl_regions";
 
+        //Membuka koneksi
         connection.Open();
 
+        //Menampilkan hasil pembacaan data database
         using(SqlDataReader reader = command.ExecuteReader())
         {
             if(reader.HasRows)
@@ -60,25 +72,33 @@ class Program
             reader.Close();
         }
 
+        //Menutup koneksi
         connection.Close();
     }
 
+    //Fungsi menampilkan data berdasarjan id
     static void GetDataById(int id)
     {
         connection = new SqlConnection(ConnectionString);
 
+        //Membuka koneksi
         connection.Open();
 
+        //Deklarasi SqlCommand object
         SqlCommand command = new SqlCommand();
         command.Connection = connection;
         command.CommandText = "SELECT * FROM tbl_regions WHERE id = @id";
 
+        //Deklarasi parameter yang dibawa fungsi untuk dapat diolah oleh SQL syntax
         SqlParameter param = new SqlParameter();
         param.ParameterName = "@id"; 
         param.Value = id;
         param.SqlDbType = SqlDbType.Int;
 
+        //Menambahkan parameter
         command.Parameters.Add(param);
+
+        //Membaca database kemudian menampilkan hasil
         using(SqlDataReader reader = command.ExecuteReader())
         {
             if (reader.HasRows)
@@ -96,31 +116,40 @@ class Program
             }
             reader.Close();
         }
+
+        //Menutup konksi
         connection.Close();
 
     }
 
+    //Fungsi memasukkan data ke dalam database
     static void InsertData(string name)
     {
         connection = new SqlConnection(ConnectionString);
 
+        //Membuka koneksi
         connection.Open();
+        //Deklarasi SqlTransaction object
         SqlTransaction transaction = connection.BeginTransaction();
 
         try
         {
+            //Membuat variable object dari class Sqlcommand
             SqlCommand command = new SqlCommand();
             command.Connection = connection;
             command.CommandText = "INSERT INTO tbl_regions(name) VALUES (@name)";
             command.Transaction = transaction;
 
+            //Mambuat variable object dari class SqlParameter 
             SqlParameter param = new SqlParameter();
             param.ParameterName = "@name";
             param.Value = name;
             param.SqlDbType = SqlDbType.VarChar;
 
+            //Menambahkan nilai variable ke dalam collection
             command.Parameters.Add(param);
 
+            //Mengecek berhasil atau tidak perintah dilakukan
             int result = command.ExecuteNonQuery();
             transaction.Commit();
             if(result > 0)
@@ -136,6 +165,7 @@ class Program
         } 
         catch(Exception ex) 
         {
+            //Handling saat terjadi error dalam proses SQL
             Console.WriteLine(ex.Message);
             try
             {
@@ -148,6 +178,7 @@ class Program
         }
     }
 
+    //Fungsi update data dalam database
     static void UpdateData(int id, string name)
     {
         connection = new SqlConnection(ConnectionString);
@@ -201,6 +232,7 @@ class Program
         }
     }
 
+    //Fungsi menghapus data dalam database
     static void DeleteData(int id)
     {
         connection = new SqlConnection(ConnectionString);
